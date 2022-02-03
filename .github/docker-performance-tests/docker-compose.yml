@@ -22,12 +22,14 @@ services:
         source: /proc
         target: /proc
     ports:
-      - '4317:4317'
+      # - '4317:4317'
+      - '4318:4318'
     user: "${UID}:${GID}"
 
   app:
-    build:
-      context: ../../${APP_PATH}
+    # build:
+    #   context: ../../${APP_PATH}
+    image: public.ecr.aws/aws-otel-test/ruby-ruby-on-rails-manual:34513b275a67833878dbab794a4f2f12687f2a11
     environment:
       - INSTANCE_ID
       - LISTEN_ADDRESS=0.0.0.0:${LISTEN_ADDRESS_PORT}
@@ -37,38 +39,38 @@ services:
       - AWS_DEFAULT_REGION
       - SAMPLE_APP_LOG_LEVEL=ERROR
       - OTEL_RESOURCE_ATTRIBUTES=service.name=aws-otel-integ-test
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel:4317
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel:4318
     ports:
       - '${LISTEN_ADDRESS_PORT}:${LISTEN_ADDRESS_PORT}'
 
-  load-generator:
-    build:
-      context: ./load-generator
-    environment:
-      - TARGET_ADDRESS=app:${LISTEN_ADDRESS_PORT}
-      - TEST_DURATION_MINUTES
-    depends_on:
-      - otel
-      - app
+  # load-generator:
+  #   build:
+  #     context: ./load-generator
+  #   environment:
+  #     - TARGET_ADDRESS=app:${LISTEN_ADDRESS_PORT}
+  #     - TEST_DURATION_MINUTES
+  #   depends_on:
+  #     - otel
+  #     - app
 
-  alarms-poller:
-    build:
-      context: ./alarms-poller
-    environment:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - AWS_SESSION_TOKEN
-      - AWS_DEFAULT_REGION
-      - HOSTMETRICS_INTERVAL_SECS
-      - NUM_OF_CPUS
-      - TARGET_SHA
-      - LOGS_NAMESPACE
-      - APP_PROCESS_COMMAND_LINE_DIMENSION_VALUE
-      - CPU_LOAD_THRESHOLD
-      - TOTAL_MEMORY_THRESHOLD
-      - GITHUB_RUN_ID
-      - MATRIX_COMMIT_COMBO
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - load-generator
+  # alarms-poller:
+  #   build:
+  #     context: ./alarms-poller
+  #   environment:
+  #     - AWS_ACCESS_KEY_ID
+  #     - AWS_SECRET_ACCESS_KEY
+  #     - AWS_SESSION_TOKEN
+  #     - AWS_DEFAULT_REGION
+  #     - HOSTMETRICS_INTERVAL_SECS
+  #     - NUM_OF_CPUS
+  #     - TARGET_SHA
+  #     - LOGS_NAMESPACE
+  #     - APP_PROCESS_COMMAND_LINE_DIMENSION_VALUE
+  #     - CPU_LOAD_THRESHOLD
+  #     - TOTAL_MEMORY_THRESHOLD
+  #     - GITHUB_RUN_ID
+  #     - MATRIX_COMMIT_COMBO
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   depends_on:
+  #     - load-generator
