@@ -1,20 +1,15 @@
 receivers:
   otlp:
     protocols:
-      # grpc:
       http:
   hostmetrics:
     collection_interval: ${HOSTMETRICS_INTERVAL_SECS}s
     scrapers:
       process:
         include:
-          # match_type: strict
-          match_type: regexp
-          # names:
-          #   - ${APP_PROCESS_EXECUTABLE_NAME}
+          match_type: strict
           names:
-            - ".*rails.*"
-            - ".*ruby.*"
+            - ${APP_PROCESS_EXECUTABLE_NAME}
 
 processors:
   filter:
@@ -27,9 +22,9 @@ processors:
           # - process.disk.io
           - process.memory.physical_usage
           - process.memory.virtual_usage
-        # resource_attributes:
-        #   - Key: process.command_line
-        #     Value: ${APP_PROCESS_COMMAND_LINE_DIMENSION_VALUE}
+        resource_attributes:
+          - Key: process.command_line
+            Value: ${APP_PROCESS_COMMAND_LINE_DIMENSION_VALUE}
   metricstransform:
     transforms:
       - include: process.*
@@ -44,31 +39,29 @@ processors:
             new_value: ${GITHUB_RUN_ID}
 
 exporters:
-  logging/debug:
-    loglevel: debug
-  logging/error:
+  logging:
     loglevel: error
-  # awsemf:
-  #   region: ${AWS_DEFAULT_REGION}
-  #   namespace: ${LOGS_NAMESPACE}
-  #   log_group_name: ${LOG_GROUP_NAME}
-  #   log_stream_name: sample-app-${MATRIX_COMMIT_COMBO}
-  #   resource_to_telemetry_conversion:
-  #     enabled: true
-  #   dimension_rollup_option: NoDimensionRollup
-  #   metric_declarations:
-  #     - dimensions: [
-  #         [
-  #           process.command_line,
-  #           commit_sha,
-  #           github_run_id
-  #         ]
-  #       ]
-  #       metric_name_selectors:
-  #         - process.cpu.time
-  #         # - process.disk.io
-  #         - process.memory.physical_usage
-  #         - process.memory.virtual_usage
+  awsemf:
+    region: ${AWS_DEFAULT_REGION}
+    namespace: ${LOGS_NAMESPACE}
+    log_group_name: ${LOG_GROUP_NAME}
+    log_stream_name: sample-app-${MATRIX_COMMIT_COMBO}
+    resource_to_telemetry_conversion:
+      enabled: true
+    dimension_rollup_option: NoDimensionRollup
+    metric_declarations:
+      - dimensions: [
+          [
+            process.command_line,
+            commit_sha,
+            github_run_id
+          ]
+        ]
+        metric_name_selectors:
+          - process.cpu.time
+          # - process.disk.io
+          - process.memory.physical_usage
+          - process.memory.virtual_usage
 
 service:
   pipelines:
@@ -76,7 +69,7 @@ service:
       receivers:
         - otlp
       exporters:
-        - logging/error
+        - logging
     metrics:
       receivers:
         - hostmetrics
@@ -86,5 +79,4 @@ service:
         - filter
         - metricstransform
       exporters:
-        # - awsemf
-        - logging/debug
+        - awsemf
