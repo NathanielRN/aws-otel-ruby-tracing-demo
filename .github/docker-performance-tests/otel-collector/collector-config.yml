@@ -40,9 +40,7 @@ processors:
 
 exporters:
   logging:
-    # Debug level only during my debugging
-    # loglevel: error
-    loglevel: info
+    loglevel: error
   awsemf:
     region: ${AWS_DEFAULT_REGION}
     namespace: ${LOGS_NAMESPACE}

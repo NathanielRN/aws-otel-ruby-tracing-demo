@@ -206,11 +206,9 @@ if __name__ == "__main__":
 
         # Delete Alarms
 
-        # DEBUG ONLY
-
-        # aws_client.delete_alarms(
-        #     AlarmNames=[cpu_load_alarm_name, total_memory_alarm_name]
-        # )
+        aws_client.delete_alarms(
+            AlarmNames=[cpu_load_alarm_name, total_memory_alarm_name]
+        )
 
         # End the Polling
 
